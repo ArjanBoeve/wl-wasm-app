@@ -6,9 +6,16 @@ SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
 <!doctype html>
 <html lang="en-us">
   <head>
+  	<head>
+
+
+   
+
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
+	
+ 
     <!--Set visual viewport size for mobile devices to the device size,
         witch results in a scale of 1 and a 1:1 mapping between CSS pixels
         and Qt device independent pixels. -->
@@ -62,7 +69,7 @@ SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
                                 exitData.text !== undefined ? ` (${exitData.text})` : '';
                             showUi(spinner);
                         },
-                        entryFunction: window.gui_wl2_entry,
+                        entryFunction: gui_wl2_entry,
                         containerElements: [screen],
                         
                     }
@@ -73,7 +80,50 @@ SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
             }
         }
     </script>
-    <script src="gui_wl2.js"></script>
-    <script type="text/javascript" src="qtloader.js"></script>
+     <script src="gui_wl2.js"></script>
+    <script src="qtloader.js"></script>
+    <script type="text/javascript">
+        async function init()
+        {
+            const spinner = document.querySelector('#qtspinner');
+            const screen = document.querySelector('#screen');
+            const status = document.querySelector('#qtstatus');
+
+            const showUi = (ui) => {
+                [spinner, screen].forEach(element => element.style.display = 'none');
+                if (screen === ui)
+                    screen.style.position = 'default';
+                ui.style.display = 'block';
+            }
+
+            try {
+                showUi(spinner);
+                status.innerHTML = 'Loading...';
+
+                console.log("typeof gui_wl2_entry in init:", typeof gui_wl2_entry);
+
+                const instance = await qtLoad({
+                    qt: {
+                        onLoaded: () => showUi(screen),
+                        onExit: exitData =>
+                        {
+                            status.innerHTML = 'Application exit';
+                            status.innerHTML +=
+                                exitData.code !== undefined ? ` with code ${exitData.code}` : '';
+                            status.innerHTML +=
+                                exitData.text !== undefined ? ` (${exitData.text})` : '';
+                            showUi(spinner);
+                        },
+                        entryFunction: gui_wl2_entry,
+                        containerElements: [screen],
+                    }
+                });
+            } catch (e) {
+                console.error(e);
+                console.error(e.stack);
+            }
+        }
+    </script>
   </body>
 </html>
+
